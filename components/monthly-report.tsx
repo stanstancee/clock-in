@@ -27,6 +27,49 @@ export function MonthlyReport({
     day: "numeric",
   });
 
+  const getTimeColor = (userId: number, timeString: string): string => {
+    // Parse time string (e.g., "09:30 AM")
+    const [time, period] = timeString.split(" ");
+    const [hours, minutes] = time.split(":").map(Number);
+
+    // Convert to 24-hour format
+    const totalMinutes =
+      (hours % 12) * 60 +
+      minutes +
+      (period === "PM" && hours !== 12 ? 12 * 60 : 0);
+
+    const specialUserIds = [1, 2, 6, 12];
+
+    if (specialUserIds.includes(userId)) {
+      // Special rule: <=9am green, >9am yellow, >9:30am red
+      const nineAM = 9 * 60; // 540 minutes
+      const nineThirtyAM = 9.5 * 60; // 570 minutes
+
+      if (totalMinutes <= nineAM) return "text-green-600";
+      if (totalMinutes <= nineThirtyAM) return "text-yellow-600";
+      return "text-red-600";
+    } else {
+      // Other rule: AM times and PM times
+      if (period === "AM" || (period === "PM" && hours === 12)) {
+        // AM times: <=8am green, >8am yellow, >8:30am red
+        const eightAM = 8 * 60; // 480 minutes
+        const eightThirtyAM = 8.5 * 60; // 510 minutes
+
+        if (totalMinutes <= eightAM) return "text-green-600";
+        if (totalMinutes <= eightThirtyAM) return "text-yellow-600";
+        return "text-red-600";
+      } else {
+        // PM times: <=6pm green, >6pm yellow, >6:30pm red
+        const sixPM = 18 * 60; // 1080 minutes
+        const sixThirtyPM = 18.5 * 60; // 1110 minutes
+
+        if (totalMinutes <= sixPM) return "text-green-600";
+        if (totalMinutes <= sixThirtyPM) return "text-yellow-600";
+        return "text-red-600";
+      }
+    }
+  };
+
   const getEmployeeHistory = (userId: number) => {
     const [year, monthNum] = selectedMonth.split("-").map(Number);
 
@@ -74,26 +117,6 @@ export function MonthlyReport({
         </div>
       </div>
 
-      {/* <div className="mb-6 grid grid-cols-3 gap-4">
-        <div className="border border-slate-300 p-4 rounded">
-          <p className="text-sm text-slate-600 mb-1">Total Employees</p>
-          <p className="text-2xl font-bold text-slate-900">{data.length}</p>
-        </div>
-        <div className="border border-slate-300 p-4 rounded">
-          <p className="text-sm text-slate-600 mb-1">Total Clock-Ins</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {data.reduce((sum, emp) => sum + emp.daysWorked, 0)}
-          </p>
-        </div>
-        <div className="border border-slate-300 p-4 rounded">
-          <p className="text-sm text-slate-600 mb-1">Avg Days Worked</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {(
-              data.reduce((sum, emp) => sum + emp.daysWorked, 0) / data.length
-            ).toFixed(1)}
-          </p>
-        </div>
-      </div> */}
       <AttendanceTable
         data={data}
         selectedMonth={selectedMonth}
@@ -136,7 +159,12 @@ export function MonthlyReport({
                       <span className="text-slate-700 font-medium">
                         {entry.date}
                       </span>
-                      <span className={cn("text-slate-900 font-semibold")}>
+                      <span
+                        className={cn(
+                          getTimeColor(employee.userId, entry.time),
+                          "font-semibold"
+                        )}
+                      >
                         {entry.time}
                       </span>
                     </div>
@@ -150,8 +178,8 @@ export function MonthlyReport({
 
       <div className="mt-8 pt-4 border-t border-slate-300 text-xs text-slate-500">
         <p>
-          This report was automatically generated Stanley's Clock-In Analysis
-          System
+          <span className="font-semibold">Note:</span> This report is generated
+          automatically and is intended for internal use only.
         </p>
       </div>
     </div>

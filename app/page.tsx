@@ -219,7 +219,6 @@ export default function Home() {
 
       {/* Print-only view */}
       <div className="hidden print:block">
-      
         <MonthlyReport
           data={processedData}
           selectedMonth={selectedMonth}
