@@ -75,7 +75,7 @@ export function MonthlyReport({
 
     const history = records
       .filter((record) => {
-        const recordUserId = record.user_id || record.user_ref;
+        const recordUserId = record.id;
         const date = new Date(record.created_at);
         return (
           recordUserId === userId &&

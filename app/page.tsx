@@ -13,9 +13,6 @@ export type ClockInRecord = {
   first_name: string;
   last_name: string;
   email: string;
-  phone: string;
-  user_ref: number;
-  user_id?: number;
   created_at: string;
   latitude: number;
   longitude: number;
@@ -71,7 +68,7 @@ export default function Home() {
     const userMap = new Map<number, EmployeeAttendance>();
 
     monthRecords.forEach((record) => {
-      const userId = record.user_id || record.user_ref;
+      const userId = record.id
       const clockInTime = new Date(record.created_at).toLocaleTimeString(
         "en-US",
         {
